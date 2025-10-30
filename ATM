@@ -1,0 +1,212 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class ATM extends JFrame implements ActionListener {
+
+    private CardLayout cardLayout;
+    private JPanel mainPanel;
+
+    // Login components
+    private JPasswordField pinField;
+    private JLabel loginMessage;
+
+    // ATM components
+    private double balance = 1000.00;
+    private JLabel balanceLabel;
+
+    public ATM() {
+        setTitle("💳 Stylish ATM Simulator");
+        setSize(520, 420);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null); 
+        setResizable(false);
+
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
+
+        mainPanel.add(createLoginPanel(), "Login");
+        mainPanel.add(createATMPannel(), "ATM");
+
+        add(mainPanel);
+        setVisible(true);
+    }
+
+    // ---------------- LOGIN PANEL ----------------
+    private JPanel createLoginPanel() {
+        JPanel panel = new JPanel(null) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Gradient background
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gp = new GradientPaint(0, 0, new Color(100, 180, 255), 0, getHeight(), new Color(180, 220, 255));
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+
+        JLabel title = new JLabel("Welcome to Smart ATM", JLabel.CENTER);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        title.setBounds(60, 40, 380, 40);
+        title.setForeground(new Color(30, 30, 70));
+        panel.add(title);
+
+        JLabel pinLabel = new JLabel("Enter PIN:");
+        pinLabel.setFont(new Font("Verdana", Font.PLAIN, 18));
+        pinLabel.setBounds(110, 130, 100, 30);
+        panel.add(pinLabel);
+
+        pinField = new JPasswordField();
+        pinField.setBounds(220, 130, 180, 30);
+        pinField.setFont(new Font("Consolas", Font.BOLD, 18));
+        pinField.setHorizontalAlignment(JTextField.CENTER);
+        panel.add(pinField);
+
+        JButton loginBtn = createStyledButton("Login", new Color(50, 130, 200));
+        loginBtn.setBounds(200, 190, 120, 40);
+        panel.add(loginBtn);
+
+        loginMessage = new JLabel("", JLabel.CENTER);
+        loginMessage.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
+        loginMessage.setBounds(100, 240, 300, 30);
+        loginMessage.setForeground(Color.RED);
+        panel.add(loginMessage);
+
+        return panel;
+    }
+
+    // ---------------- ATM PANEL ----------------
+    private JPanel createATMPannel() {
+        JPanel panel = new JPanel(null) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // soft gradient
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gp = new GradientPaint(0, 0, new Color(230, 250, 240), getWidth(), getHeight(), new Color(210, 240, 230));
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+
+        JLabel title = new JLabel("ATM Main Menu", JLabel.CENTER);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setBounds(100, 30, 300, 40);
+        title.setForeground(new Color(0, 90, 60));
+        panel.add(title);
+
+        balanceLabel = new JLabel("Current Balance: ₹" + balance, JLabel.CENTER);
+        balanceLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
+        balanceLabel.setBounds(100, 90, 300, 30);
+        panel.add(balanceLabel);
+
+        JButton checkBtn = createStyledButton("Check Balance", new Color(72, 61, 139));
+        checkBtn.setBounds(170, 140, 180, 35);
+        panel.add(checkBtn);
+
+        JButton depositBtn = createStyledButton("Deposit", new Color(46, 139, 87));
+        depositBtn.setBounds(170, 190, 180, 35);
+        panel.add(depositBtn);
+
+        JButton withdrawBtn = createStyledButton("Withdraw", new Color(255, 165, 0));
+        withdrawBtn.setBounds(170, 240, 180, 35);
+        panel.add(withdrawBtn);
+
+        JButton exitBtn = createStyledButton("Exit", new Color(178, 34, 34));
+        exitBtn.setBounds(170, 290, 180, 35);
+        panel.add(exitBtn);
+
+        return panel;
+    }
+
+    // ---------------- CUSTOM STYLED BUTTON ----------------
+    private JButton createStyledButton(String text, Color bgColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Verdana", Font.BOLD, 15));
+        button.setForeground(Color.WHITE);
+        button.setBackground(bgColor);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        button.setOpaque(true);
+
+        // Hover effect
+        button.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(bgColor.darker());
+            }
+
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(bgColor);
+            }
+        });
+
+        button.addActionListener(this);
+        return button;
+    }
+
+    // ---------------- EVENT HANDLING ----------------
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String command = e.getActionCommand();
+
+        if (command.equals("Login")) {
+            String enteredPin = new String(pinField.getPassword());
+            if (enteredPin.equals("1234")) {
+                loginMessage.setText("");
+                cardLayout.show(mainPanel, "ATM");
+            } else {
+                loginMessage.setText("❌ Invalid PIN. Try again!");
+            }
+        } 
+        else if (command.equals("Check Balance")) {
+            JOptionPane.showMessageDialog(this, "💰 Your balance is ₹" + balance,
+                    "Balance", JOptionPane.INFORMATION_MESSAGE);
+        } 
+        else if (command.equals("Deposit")) {
+            String input = JOptionPane.showInputDialog(this, "Enter amount to deposit:");
+            if (input != null) {
+                try {
+                    double amt = Double.parseDouble(input);
+                    if (amt > 0) {
+                        balance += amt;
+                        balanceLabel.setText("Current Balance: ₹" + balance);
+                        JOptionPane.showMessageDialog(this, "✅ ₹" + amt + " deposited successfully!");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Invalid amount!", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Please enter a valid number!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } 
+        else if (command.equals("Withdraw")) {
+            String input = JOptionPane.showInputDialog(this, "Enter amount to withdraw:");
+            if (input != null) {
+                try {
+                    double amt = Double.parseDouble(input);
+                    if (amt > 0 && amt <= balance) {
+                        balance -= amt;
+                        balanceLabel.setText("Current Balance: ₹" + balance);
+                        JOptionPane.showMessageDialog(this, "✅ ₹" + amt + " withdrawn successfully!");
+                    } else if (amt > balance) {
+                        JOptionPane.showMessageDialog(this, "❌ Insufficient balance!", "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Invalid amount!", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Please enter a valid number!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } 
+        else if (command.equals("Exit")) {
+            JOptionPane.showMessageDialog(this, "👋 Thank you for using Smart ATM!");
+            System.exit(0);
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new ATM());
+    }
+}
